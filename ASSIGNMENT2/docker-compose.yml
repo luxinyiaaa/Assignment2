@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  auth_service:
+    build:
+      context: .
+      dockerfile: Dockerfile-auth
+    ports:
+      - "8001:8001"
+    environment:
+      # 通过环境变量指定数据库存放在容器内 /data 目录（注意路径前面有四个斜杠）
+      - AUTH_DB_URI=sqlite:////data/users.db
+    volumes:
+      # 将名为 auth_db 的 volume 挂载到 /data 中，保证数据库文件持久化
+      - auth_db:/data
+
+  url_shortener:
+    build:
+      context: .
+      dockerfile: Dockerfile-url
+    ports:
+      - "8000:8000"
+    environment:
+      - URL_DB_URI=sqlite:////data/urls.db
+    volumes:
+      - url_db:/data
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      # 挂载自定义 Nginx 配置（建议更新配置以使用 Compose 服务名作为反向代理目标）
+      - ./app/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth_service
+      - url_shortener
+
+volumes:
+  auth_db:
+  url_db:

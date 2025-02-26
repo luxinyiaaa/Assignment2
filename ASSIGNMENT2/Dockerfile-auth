@@ -1,0 +1,16 @@
+# Dockerfile-auth-auth
+FROM python:3.9-slim
+
+WORKDIR /app
+# 假设 requirements.txt 中包含 flask, flask_sqlalchemy, werkzeug 等依赖
+COPY /app/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 将认证服务代码复制到容器内
+COPY /app/auth.py .
+
+# 为数据持久化，建议将 SQLite 数据库存放在 /data 目录下（需修改代码以支持环境变量配置）
+ENV AUTH_DB_URI=sqlite:////data/users.db
+
+EXPOSE 8001
+CMD ["python", "auth.py"]

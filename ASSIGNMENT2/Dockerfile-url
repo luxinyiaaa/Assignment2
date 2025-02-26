@@ -1,0 +1,17 @@
+# Dockerfile.url
+FROM python:3.9-slim
+
+WORKDIR /app
+# 同样要求 requirements.txt 包含 flask, flask_sqlalchemy, requests 等依赖
+COPY /app/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 复制 URL 短链接服务代码（注意：若 main.py 中依赖 database.py，请确保一并复制）
+COPY /app/main.py .
+COPY /app/database.py .
+
+# 设置环境变量，修改数据库位置到 /data
+ENV URL_DB_URI=sqlite:////data/urls.db
+
+EXPOSE 8000
+CMD ["python", "main.py"]
